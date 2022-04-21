@@ -46,7 +46,13 @@ library(NCmisc)
 # file.split("modified_taxi.csv", size = 700000, verbose = TRUE,suf = "part", win = TRUE)
 
 
-#Read files?
+#READ CSV FILE AND CONVERT TO ONE DATA FRAME
+col_name <- c("","Trip.Start.Timestamp","Trip.Seconds","Trip.Miles","Pickup.Community.Area","Dropoff.Community.Area","Company")
+# setwd("bigYellowTaxi/Data/")
+myfiles <- list.files(pattern="*.csv", full.names=TRUE)
+myfiles
+data <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
+colnames(data) <- col_name
 
 #libraries to include
 

@@ -46,7 +46,13 @@ library(NCmisc)
 # file.split("modified_taxi.csv", size = 700000, verbose = TRUE,suf = "part", win = TRUE)
 
 
-#Read files?
+#Read files
+setwd("/Data")
+myfiles <- list.files(pattern="*.csv", full.names=TRUE)
+myfiles
+data <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
+colnames(data) <- col_name
+
 
 #libraries to include
 
@@ -62,7 +68,7 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 
-communityName <- c("Palatine", "Arlington Heights")
+communityName <- sort(unique(data$Pickup.Community.Area))
 companyName <- c("OddTaxi", "OddTaxi part2")
 distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
 

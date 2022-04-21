@@ -20,7 +20,26 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 
-communityName <- c("Palatine", "Arlington Heights")
+community_list <- c("Rogers Park", "West Ridge", "Uptown", 
+                    "Lincoln Square", "North Center", "Lake View",
+                    "Lincoln Park", "Near North Side", "Edison Park",
+                    "Norwood Park", "Jefferson Park", "Forest Glen",
+                    "North Park", "Albany Park", "Portage Park",
+                    "Irving Park", "Dunning", "Montclare", "Belmont Cragin",
+                    "Hermosa", "Avondale", "Logan Square", "Humboldt Park",
+                    "West Town", "Austin", "West Garfield Park",
+                    "East Garfield Park", "Near West Side", "North Lawndale",
+                    "South Lawndale", "Lower West Side", "Loop", "Near South Side",
+                    "Armour Square", "Douglas", "Oakland", "Fuller Park", 
+                    "Grand Boulevard", "Kenwood", "Washington Park", "Hyde Park",
+                    "Woodlawn", "South Shore", "Chatham", "Avalon Park", "South Chicago",
+                    "Burnside", "Calumet Heights", "Roseland", "Pullman", "South Deering",
+                    "East Side", "West Pullman", "Riverdale", "Hegewisch", "Garfield Ridge",
+                    "Archer Heights", "Brighton Park", "Mckinley Park", "Bridgeport",
+                    "New City", "West Elsdon", "Gage Park", "Clearing", "West Lawn",
+                    "Chicago Lawn", "West Englewood", "Englewood", "Greater Grand Crossing",
+                    "Ashburn", "Auburn Gresham", "Beverly", "Washington Heights",
+                    "Mount Greenwood", "Morgan Park", "Ohare", "Edgewater") # R IS INDEX STARTING 1 NOT 0
 companyName <- c("OddTaxi", "OddTaxi part2")
 distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
 
@@ -46,7 +65,7 @@ ui <- shinyUI(
                                        column(12,
                                               br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
                                               br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
-                                              selectInput("select_community", "Select Community", communityName),
+                                              selectInput("select_community", "Select Community", community_list),
                                               
                                               selectInput("select_company", "Select Company", companyName),
                                               
@@ -66,34 +85,61 @@ ui <- shinyUI(
                                               )
                                        )
                                 ),
-                                column(8,
-                                       br(), 
-                                       fluidRow( id="scopes_graph",
-                                                 box(
+                                column(11, br(), br(),
+                                    fluidRow(id="top-row",
+                                        column(10,id="scopes_graph",
+                                               box(
                                                    title = "Bar Chart (for different scopes of the day) ", width = "100%", height = 750
-                                                 ),
-                                       ),
-                                       br(),
-                                       fluidRow( id="communities_graph",
-                                                 box(
-                                                   title = "Bar Chart (for all communities) ", width = "100%", height = 700
-                                                 )
-                                       )
-                                       
-                                ),
-                                column(3,
-                                       br(),
-                                       fluidRow( id="table_box",
-                                                 box(
-                                                   title = "Table ", width = "25%", height = 750
-                                                 )
-                                       ),
-                                       fluidRow( id="leaflet_box",
-                                                 box(
-                                                   title = "Leaflet", width = "25%", height = 730
-                                                 )
-                                       )
+                                               )     
+                                        ),
+                                        column(2,id="table_box",
+                                               box(
+                                                  title = "Table ", width = "20%", height = 700
+                                                )
+                                        )
+                                    ), br(), 
+                                    fluidRow(id="top-row",
+                                             column(9,
+                                                    box(
+                                                      title = "Bar Chart (for different scopes of the day) ", width = "100%", height = 750
+                                                    )     
+                                             ),
+                                             column(3,
+                                                    box(
+                                                      title = "Table ", width = "20%", height = 700
+                                                    )
+                                             )
+                                    )
                                 )
+                                # column(8,
+                                #        br(), 
+                                #        fluidRow( id="scopes_graph",
+                                #                  box(
+                                #                    title = "Bar Chart (for different scopes of the day) ", width = "100%", height = 750
+                                #                  ),
+                                #        ),
+                                #        br(),
+                                #        fluidRow( id="communities_graph",
+                                #                  box(
+                                #                    title = "Bar Chart (for all communities) ", width = 800, height = 700
+                                #                  )
+                                #        )
+                                #        
+                                # ),
+                                # column(3,
+                                #        br(),
+                                #        fluidRow( id="table_box",
+                                #                  box(
+                                #                    title = "Table ", width = "20%", height = 700
+                                #                  )
+                                #        ),
+                                #        br(),br(),
+                                #        fluidRow( id="leaflet_box",
+                                #                  box(
+                                #                    title = "Leaflet", width = "45%", height = 720
+                                #                  )
+                                #        )
+                                # )
                                 
                       )
              ),
@@ -119,6 +165,7 @@ ui <- shinyUI(
 )
 
 server <- function(input, output, session) {
+  
   
 }
 

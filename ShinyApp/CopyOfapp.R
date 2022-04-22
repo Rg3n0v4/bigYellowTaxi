@@ -12,6 +12,8 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 library(rlang)
+library(rgdal)
+# library(sp)
 
 #READ CSV FILE AND CONVERT TO ONE DATA FRAME
 col_name <- c("","Trip.Start.Timestamp","Trip.Seconds","Trip.Miles","Pickup.Community.Area","Dropoff.Community.Area","Company")
@@ -26,6 +28,10 @@ n_date <- parse_date_time(data$Trip.Start.Timestamp,
                           orders = 'mdY IMS %p', truncated = 3) #PARSE DATE FROM TIME STAMP
 data$new_date <- n_date
 data$Hour <- hour(data$new_date)
+
+chi_sp <-  rgdal::readOGR("Boundaries - Community Areas (current).geojson")
+pal <- colorNumeric("viridis", NULL)
+print(chi_sp)
 
 community_list <- c("Rogers Park", "West Ridge", "Uptown",
                     "Lincoln Square", "North Center", "Lake View",
@@ -69,6 +75,20 @@ company_list <- c("1085 - 72312 N and W Cab Co", "1469 - 64126 Omar Jada","2092 
                   "Petani Cab Corp", "U Taxicab")
 
 new_company_list <- append(company_list, "All Taxis", 0)
+
+upper_com <- NULL
+for(i in community_list){
+  print(i)
+  print(toupper(i))
+  upper_com <- append(upper_com, toupper(i))
+}
+
+df<-data.frame(upper_com)
+df$pop <- 25
+for(i in 1:length(df[,1])){
+  print(i)
+  df[i,2] <- df[i,2] + i
+}
 
 distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
 
@@ -230,9 +250,12 @@ server <- function(input, output, session) {
   })
 
   output$mymap3 <- renderLeaflet({
-    leaflet() %>%
+    leaflet(chi_sp) %>%
       addTiles() %>%
-      setView(lng=-87.6298, lat = 41.8681, zoom = 13)
+      addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+                  fillColor = ~pal(df[area_num_1, 2]),
+                  label = ~paste0(community, ":", df[area_num_1, 2])) %>%
+      addLegend(pal = pal, values = df$pop, opacity = 1.0)
   })
 
 }

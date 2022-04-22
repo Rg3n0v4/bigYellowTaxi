@@ -213,14 +213,14 @@ server <- function(input, output, session) {
     colnames(noFilter_byDay) <- c("Date", "Rides")
     return(noFilter_byDay)
   }) #Aggregates all stations by specific date
-  
+
+
+#------------------ FOR HOUR ------------------
   byHourNoFilter <- reactive({
     noFilter_byHour <- aggregate(data[,1], by=list(data$Hour), FUN=length)
     colnames(noFilter_byHour) <- c("Hour", "Rides")
     return(noFilter_byHour)
   })
-
-#------------------ FOR HOUR ------------------
   
   byHour <- reactive({
     #If you don't include this, going back to city of chicago is slow
@@ -232,9 +232,171 @@ server <- function(input, output, session) {
     noFilter_byHour <- aggregate(updateData[,1], by=list(updateData$Hour), FUN=length)
     colnames(noFilter_byHour) <- c("Hour", "Rides")
     return(noFilter_byHour)
-  }) #Aggregates all stations by specific date
+  }) #Aggregates all stations by specific hour
+  
+#----------- FOR DAY OF WEEK -----------------
+  #* STARTS MONDAY TO SUNDAY WITH 1 BEING MONDAY
+  
+  byDayOfWeekNoFilter <- reactive({
+    noFilter_byDayOfWeek <- aggregate(data[,1], by=list(wday(data$new_date, week_start=1)), FUN=length)
+    colnames(noFilter_byDayOfWeek) <- c("Day Of Week", "Rides")
+    return(noFilter_byDayOfWeek)
+  })
+  
+  byDayOfWeek <- reactive({
+    #If you don't include this, going back to city of chicago is slow
+    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+      return(byDayOfWeekNoFilter())
+    }
+    
+    updateData <- filterData()
+    #Aggregate by weekday
+    noFilter_byDayOfWeek <- aggregate(updateData[,1], by=list(wday(updateData$new_date, week_start=1)), FUN=length)
+    colnames(noFilter_byDayOfWeek) <- c("Day Of Week", "Rides")
+    
+    return(noFilter_byDayOfWeek)
+  }) #Aggregates all stations by specific day of week
+  
+#-------- FOR MONTH ----------------------
+  
+  byMonthNoFilter <- reactive({
+    noFilter_byMonth <- aggregate(data[,1], by=list(month(data$new_date)), FUN=length)
+    colnames(noFilter_byMonth) <- c("Month", "Rides")
+    return(noFilter_byMonth)
+  })
+  
+  byMonth <- reactive({
+    #If you don't include this, going back to city of chicago is slow
+    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+      return(byMonthNoFilter())
+    }
+    
+    updateData <- filterData()
+    #Aggregate by month
+    noFilter_byMonth<- aggregate(updateData[,1], by=list(month(updateData$new_date)), FUN=length)
+    colnames(noFilter_byMonth) <- c("Month", "Rides")
+    
+    return(noFilter_byMonth)
+  }) #Aggregates all stations by specific month
+  
+  
+#-------- FOR MILEAGE ----------------------
+  
+  byMileagehNoFilter <- reactive({
+    #Aggregate by binned mileage 
+    
+    #Add to global
+    mile_bin <- c("0.5 to < 10", "10 to < 20", "20 to < 30", "30 to < 40", "40 to < 50", "50 to < 60", "60 to < 70", "70 to < 80", "80 to < 90", "90 to 100")
+    
+    #Actual code to get data frame
+    bin_data = data.frame(data)
+    bin_data$Mile_Bin <- NA
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 10] <- mile_bin[1]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 10 & bin_data$Trip.Miles < 20] <- mile_bin[2]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 20 & bin_data$Trip.Miles < 30] <- mile_bin[3]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 40] <- mile_bin[4]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 40 & bin_data$Trip.Miles < 50] <- mile_bin[5]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 50 & bin_data$Trip.Miles < 60] <- mile_bin[6]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 70] <- mile_bin[7]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 70 & bin_data$Trip.Miles < 80] <- mile_bin[8]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 80 & bin_data$Trip.Miles < 90] <- mile_bin[9]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles <= 100] <- mile_bin[10]
+    bin_data$Mile_Bin <- as.factor(bin_data$Mile_Bin)
+    
+    noFilter_byBinnedMileage <- aggregate(bin_data[,1], by=list(bin_data$Mile_Bin), FUN=length)
+    colnames(noFilter_byBinnedMileage) <- c("Miles", "Rides")
+    return(noFilter_byBinnedMileage)
+  })
+  
+  byMileage <- reactive({
+    #If you don't include this, going back to city of chicago is slow
+    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+      return(byMileagehNoFilter())
+    }
+    
+    updateData <- filterData()
+    #Aggregate by binned mileage 
+    
+    #Add to global
+    mile_bin <- c("0.5 to < 10", "10 to < 20", "20 to < 30", "30 to < 40", "40 to < 50", "50 to < 60", "60 to < 70", "70 to < 80", "80 to < 90", "90 to 100")
+    
+    #Actual code to get data frame
+    bin_data = data.frame(updateData)
+    bin_data$Mile_Bin <- NA
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 10] <- mile_bin[1]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 10 & bin_data$Trip.Miles < 20] <- mile_bin[2]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 20 & bin_data$Trip.Miles < 30] <- mile_bin[3]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 40] <- mile_bin[4]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 40 & bin_data$Trip.Miles < 50] <- mile_bin[5]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 50 & bin_data$Trip.Miles < 60] <- mile_bin[6]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 70] <- mile_bin[7]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 70 & bin_data$Trip.Miles < 80] <- mile_bin[8]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 80 & bin_data$Trip.Miles < 90] <- mile_bin[9]
+    bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles <= 100] <- mile_bin[10]
+    bin_data$Mile_Bin <- as.factor(bin_data$Mile_Bin)
+    
+    noFilter_byBinnedMileage <- aggregate(bin_data[,1], by=list(bin_data$Mile_Bin), FUN=length)
+    colnames(noFilter_byBinnedMileage) <- c("Miles", "Rides")
+    noFilter_byBinnedMileage
+    
+    return(noFilter_byBinnedMileage)
+  }) #Aggregates all stations by mileage
+  
+#-------- FOR TIME ----------------------
+  
+  byTimeNoFilter <- reactive({
+    # #Add to global
+    time_bin <- c("1 minute to < 5 minutes", "5 minute to < 10 minutes", "10 minute to < 30 minutes", "30 minute to < 1 hr", "1 hr to < 2 hr", "2 hr to < 3 hr", "3 hr to < 4 hr", "4 hr to 5 hr")
+    
+    # #Actual code to get data frame
+    bin_data = data.frame(data)
+    bin_data$Time_Bin <- NA
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 60 & bin_data$Trip.Seconds < 300] <- time_bin[1]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 300 & bin_data$Trip.Seconds < 600] <- time_bin[2]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 600 & bin_data$Trip.Seconds < 1800] <- time_bin[3]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 1800 & bin_data$Trip.Seconds < 3600] <- time_bin[4]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 3600 & bin_data$Trip.Seconds < 7200] <- time_bin[5]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 7200 & bin_data$Trip.Seconds < 10800] <- time_bin[6]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 10800 & bin_data$Trip.Seconds < 14400] <- time_bin[7]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 14400 & bin_data$Trip.Seconds < 18000] <- time_bin[8]
+    bin_data$Time_Bin <- factor(bin_data$Time_Bin, levels = time_bin, ordered = TRUE) 
+    noFilter_byBinnedTime <- aggregate(bin_data[,1], by=list(bin_data$Time_Bin), FUN=length)
+    colnames(noFilter_byBinnedTime) <- c("Time", "Rides")
+    return(noFilter_byBinnedTime)
+  })
+  
+  byTime <- reactive({
+    #If you don't include this, going back to city of chicago is slow
+    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+      return(byTimeNoFilter())
+    }
+    
+    updateData <- filterData()
+    #Aggregate by Trip Time
+    print(min(updateData$Trip.Seconds))
+    max(updateData$Trip.Seconds)
+    
+    # #Add to global
+    time_bin <- c("1 minute to < 5 minutes", "5 minute to < 10 minutes", "10 minute to < 30 minutes", "30 minute to < 1 hr", "1 hr to < 2 hr", "2 hr to < 3 hr", "3 hr to < 4 hr", "4 hr to 5 hr")
+    
+    # #Actual code to get data frame
+    bin_data = data.frame(updateData)
+    bin_data$Time_Bin <- NA
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 60 & bin_data$Trip.Seconds < 300] <- time_bin[1]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 300 & bin_data$Trip.Seconds < 600] <- time_bin[2]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 600 & bin_data$Trip.Seconds < 1800] <- time_bin[3]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 1800 & bin_data$Trip.Seconds < 3600] <- time_bin[4]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 3600 & bin_data$Trip.Seconds < 7200] <- time_bin[5]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 7200 & bin_data$Trip.Seconds < 10800] <- time_bin[6]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 10800 & bin_data$Trip.Seconds < 14400] <- time_bin[7]
+    bin_data$Time_Bin[bin_data$Trip.Seconds >= 14400 & bin_data$Trip.Seconds < 18000] <- time_bin[8]
+    bin_data$Time_Bin <- factor(bin_data$Time_Bin, levels = time_bin, ordered = TRUE) 
+    noFilter_byBinnedTime <- aggregate(bin_data[,1], by=list(bin_data$Time_Bin), FUN=length)
+    colnames(noFilter_byBinnedTime) <- c("Time", "Rides")
+    return(noFilter_byBinnedTime)
+  }) #Aggregates all stations by specific month
 
-
+#--------------- graph_scope_chart function -------------------
   graph_scope_chart <- function(){
     
     distribution <- input$select_distribution # distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
@@ -253,22 +415,26 @@ server <- function(input, output, session) {
       noFilter_byHour <- byHour()
       g <- ggplot(data=noFilter_byHour, aes(x=`Hour`, y=`Rides`)) + geom_bar(stat="identity")
     }
-    # else if(distribution == "By Day of Week")
-    # {
-    #   
-    # }
-    # else if(distribution == "By Month")
-    # {
-    #   
-    # }
-    # else if(distribution == "By Binned Mileage")
-    # {
-    #   
-    # }
-    # else if(distribution == "By Binned Trip Time")
-    # {
-    #   
-    # }
+    else if(distribution == "By Day of Week")
+    {
+      noFilter_byDayOfWeek <- byDayOfWeek()
+      g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day Of Week`, y=`Rides`)) + geom_bar(stat="identity")
+    }
+    else if(distribution == "By Month")
+    {
+      noFilter_byMonth<- byMonth()
+      g <- ggplot(data=noFilter_byMonth, aes(x=`Month`, y=`Rides`)) + geom_bar(stat="identity")
+    }
+    else if(distribution == "By Binned Mileage")
+    {
+      noFilter_byMileage <- byMileage()
+      g <- ggplot(data=noFilter_byMileage, aes(x=`Miles`, y=`Rides`)) + geom_bar(stat="identity")
+    }
+    else if(distribution == "By Binned Trip Time")
+    {
+      noFilter_byTime<- byTime()
+      g <- ggplot(data=noFilter_byTime, aes(x=`Time`, y=`Rides`)) + geom_bar(stat="identity")
+    }
 
 
 

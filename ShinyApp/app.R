@@ -195,41 +195,87 @@ server <- function(input, output, session) {
     return(updateData)
   })
 
+#------------------ FOR DAY ----------------  
   byDayNoFilter <- reactive({
     noFilter_byDay <- aggregate(data[,1], by=list(date(data$new_date)), FUN=length)
     colnames(noFilter_byDay) <- c("Date", "Rides")
     return(noFilter_byDay)
   })
-
+  
   byDay <- reactive({
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
       return(byDayNoFilter())
     }
-
+    
     updateData <- filterData()
     noFilter_byDay <- aggregate(updateData[,1], by=list(date(updateData$new_date)), FUN=length)
     colnames(noFilter_byDay) <- c("Date", "Rides")
     return(noFilter_byDay)
   }) #Aggregates all stations by specific date
+  
+  byHourNoFilter <- reactive({
+    noFilter_byHour <- aggregate(data[,1], by=list(data$Hour), FUN=length)
+    colnames(noFilter_byHour) <- c("Hour", "Rides")
+    return(noFilter_byHour)
+  })
+
+#------------------ FOR HOUR ------------------
+  
+  byHour <- reactive({
+    #If you don't include this, going back to city of chicago is slow
+    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+      return(byHourNoFilter())
+    }
+    
+    updateData <- filterData()
+    noFilter_byHour <- aggregate(updateData[,1], by=list(updateData$Hour), FUN=length)
+    colnames(noFilter_byHour) <- c("Hour", "Rides")
+    return(noFilter_byHour)
+  }) #Aggregates all stations by specific date
 
 
   graph_scope_chart <- function(){
+    
+    distribution <- input$select_distribution # distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
 
     # d_graph <- allStops1()
     g <- NULL
     # i_order = orderOpt2()
+    
+    if(distribution == "By Day")
+    {
+      noFilter_byDay <- byDay()
+      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
+    }
+    else if(distribution == "By Hour of Day")
+    {
+      noFilter_byHour <- byHour()
+      g <- ggplot(data=noFilter_byHour, aes(x=`Hour`, y=`Rides`)) + geom_bar(stat="identity")
+    }
+    # else if(distribution == "By Day of Week")
+    # {
+    #   
+    # }
+    # else if(distribution == "By Month")
+    # {
+    #   
+    # }
+    # else if(distribution == "By Binned Mileage")
+    # {
+    #   
+    # }
+    # else if(distribution == "By Binned Trip Time")
+    # {
+    #   
+    # }
 
 
 
     return(g)
   }
 
-  output$scopechart <- renderPlot({
-    noFilter_byDay <- byDay()
-    ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
-
-    })
+  output$scopechart <- renderPlot({   graph_scope_chart()  })
 
 }
 

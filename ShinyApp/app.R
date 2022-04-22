@@ -1,17 +1,3 @@
-#READ CSV FILE AND CONVERT TO ONE DATA FRAME
-col_name <- c("","Trip.Start.Timestamp","Trip.Seconds","Trip.Miles","Pickup.Community.Area","Dropoff.Community.Area","Company")
-# setwd("bigYellowTaxi/Data/")
-myfiles <- list.files(pattern="*.csv", full.names=TRUE)
-myfiles
-data <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
-colnames(data) <- col_name
-
-#ADDED
-n_date <- parse_date_time(data$Trip.Start.Timestamp,
-                          orders = 'mdY IMS %p', truncated = 3) #PARSE DATE FROM TIME STAMP
-data$new_date <- n_date
-data$Hour <- hour(data$new_date)
-
 #libraries to include
 
 library(shiny)
@@ -26,6 +12,20 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 library(rlang)
+
+#READ CSV FILE AND CONVERT TO ONE DATA FRAME
+col_name <- c("","Trip.Start.Timestamp","Trip.Seconds","Trip.Miles","Pickup.Community.Area","Dropoff.Community.Area","Company")
+# setwd("bigYellowTaxi/Data/")
+myfiles <- list.files(pattern="*.csv", full.names=TRUE)
+myfiles
+data <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
+colnames(data) <- col_name
+
+#ADDED
+n_date <- parse_date_time(data$Trip.Start.Timestamp,
+                          orders = 'mdY IMS %p', truncated = 3) #PARSE DATE FROM TIME STAMP
+data$new_date <- n_date
+data$Hour <- hour(data$new_date)
 
 community_list <- c("Rogers Park", "West Ridge", "Uptown",
                     "Lincoln Square", "North Center", "Lake View",
@@ -186,8 +186,9 @@ server <- function(input, output, session) {
   output$scopechart <- renderPlot({
     noFilter_byDay <- aggregate(data[,1], by=list(date(data$new_date)), FUN=length)
     colnames(noFilter_byDay) <- c("Date", "Rides")
+    # allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
 
-    ggplot(data=noFilter_byDay, aes(x=noFilter_byDay$Date, y=noFilter_byDay$Rides)) + geom_bar(stat="identity")
+    ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
 
     })
 

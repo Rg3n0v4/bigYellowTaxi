@@ -124,7 +124,8 @@ ui <- shinyUI(
                                         ),
                                         column(2,id="table_box",
                                                box(
-                                                  title = "Table ", width = "20%", height = 700
+                                                  title = "Table ", width = "20%", height = 700,
+                                                  dataTableOutput("table_scopes")
                                                 )
                                         )
                                     ), br(),
@@ -397,13 +398,12 @@ server <- function(input, output, session) {
   }) #Aggregates all stations by specific month
 
 #--------------- graph_scope_chart function -------------------
-  graph_scope_chart <- function(){
+  graph_scope_chart <- function()
+  {
     
     distribution <- input$select_distribution # distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
-
-    # d_graph <- allStops1()
+    
     g <- NULL
-    # i_order = orderOpt2()
     
     if(distribution == "By Day")
     {
@@ -436,12 +436,45 @@ server <- function(input, output, session) {
       g <- ggplot(data=noFilter_byTime, aes(x=`Time`, y=`Rides`)) + geom_bar(stat="identity")
     }
 
-
-
     return(g)
+  }
+  
+  scope_table <- function()
+  {
+    distribution <- input$select_distribution # distributionType <- c("By Day", "By Hour of Day", "By Day of Week", "By Month", "By Binned Mileage", "By Binned Trip Time")
+    
+    g <- NULL
+    
+    if(distribution == "By Day")
+    {
+      g <- byDay()
+    }
+    else if(distribution == "By Hour of Day")
+    {
+      g <- byHour()
+    }
+    else if(distribution == "By Day of Week")
+    {
+      g <- byDayOfWeekr()
+    }
+    else if(distribution == "By Month")
+    {
+      g <- byMonth()
+    }
+    else if(distribution == "By Binned Mileage")
+    {
+      g <- byMileage()
+    }
+    else if(distribution == "By Binned Trip Time")
+    {
+      g <- byTime()
+    }
+    
   }
 
   output$scopechart <- renderPlot({   graph_scope_chart()  })
+  
+  output$table_scopes <- renderDataTable(scope_table(), options = list(pageLength = 10))
 
 }
 

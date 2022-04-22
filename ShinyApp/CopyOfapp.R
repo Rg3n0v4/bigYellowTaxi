@@ -135,9 +135,7 @@ ui <- shinyUI(
                                                        )
                                                 ),
                                                 column(3, id="leaflet_box",
-                                                       box(
-                                                         title = "Leaflet", width = "20%", height = 700
-                                                       )
+                                                       leafletOutput("mymap3", height=700, width="100%")
                                                 )
                                        )
                                 )
@@ -229,6 +227,12 @@ server <- function(input, output, session) {
     noFilter_byDay <- byDay()
     ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
 
+  })
+
+  output$mymap3 <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng=-87.6298, lat = 41.8681, zoom = 13)
   })
 
 }

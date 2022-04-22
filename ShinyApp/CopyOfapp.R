@@ -115,31 +115,31 @@ ui <- shinyUI(
                                        )
                                 ),
                                 column(11, br(), br(),
-                                    fluidRow(id="top-row",
-                                        column(10,id="scopes_graph",
-                                               box(
-                                                   title = "Bar Chart (for different scopes of the day)",solidHeader = TRUE, status = "primary", width = "100%", height = 750,
-                                                   plotOutput("scopechart", width = "100%", height = 700)
-                                               )
-                                        ),
-                                        column(2,id="table_box",
-                                               box(
-                                                  title = "Table ", width = "20%", height = 700
+                                       fluidRow(id="top-row",
+                                                column(10,id="scopes_graph",
+                                                       box(
+                                                         title = "Bar Chart (for different scopes of the day)",solidHeader = TRUE, status = "primary", width = "100%", height = 750,
+                                                         plotOutput("scopechart", width = "100%", height = 700)
+                                                       )
+                                                ),
+                                                column(2,id="table_box",
+                                                       box(
+                                                         title = "Table ", width = "20%", height = 700
+                                                       )
                                                 )
-                                        )
-                                    ), br(),
-                                    fluidRow(id="top-row",
-                                             column(9, id="communities_graph",
-                                                    box(
-                                                      title = "Bar Chart (for all communities)", width = "100%", height = 750
-                                                    )
-                                             ),
-                                             column(3, id="leaflet_box",
-                                                    box(
-                                                      title = "Leaflet", width = "20%", height = 700
-                                                    )
-                                             )
-                                    )
+                                       ), br(),
+                                       fluidRow(id="top-row",
+                                                column(9, id="communities_graph",
+                                                       box(
+                                                         title = "Bar Chart (for all communities)", width = "100%", height = 750
+                                                       )
+                                                ),
+                                                column(3, id="leaflet_box",
+                                                       box(
+                                                         title = "Leaflet", width = "20%", height = 700
+                                                       )
+                                                )
+                                       )
                                 )
 
                       )
@@ -229,7 +229,7 @@ server <- function(input, output, session) {
     noFilter_byDay <- byDay()
     ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
 
-    })
+  })
 
 }
 

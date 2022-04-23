@@ -295,6 +295,11 @@ server <- function(input, output, session) {
     return(eachCommunity)
   })
 
+  observeEvent(input$mymap3_shape_click,{
+    p <- input$mymap3_shape_click
+    updateSelectInput(session, "select_community", selected= p$id)
+  })
+
   output$mymap3 <- renderLeaflet({
     comm_df <- community_data()
     pal <- colorBin("YlOrRd", comm_df$Percentage, 9, pretty = FALSE)
@@ -302,7 +307,8 @@ server <- function(input, output, session) {
       addTiles() %>%
       addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
                   fillColor = ~pal(comm_df[area_num_1, 2]),
-                  popup = ~paste(sep="<br/>", community, comm_df[area_num_1, 2])) %>%
+                  popup = ~paste(sep="<br/>", community, comm_df[area_num_1, 2]),
+                  layerId = ~comm_df[area_num_1, 1]) %>%
       addLegend(pal = pal, values = comm_df$Percentage, opacity = 1.0)
   })
 

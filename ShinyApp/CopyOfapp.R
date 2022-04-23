@@ -30,8 +30,6 @@ data$new_date <- n_date
 data$Hour <- hour(data$new_date)
 
 chi_sp <-  rgdal::readOGR("Boundaries - Community Areas (current).geojson")
-pal <- colorNumeric("viridis", NULL)
-print(chi_sp)
 
 community_list <- c("Rogers Park", "West Ridge", "Uptown",
                     "Lincoln Square", "North Center", "Lake View",
@@ -78,15 +76,12 @@ new_company_list <- append(company_list, "All Taxis", 0)
 
 upper_com <- NULL
 for(i in community_list){
-  print(i)
-  print(toupper(i))
   upper_com <- append(upper_com, toupper(i))
 }
 
 df<-data.frame(upper_com)
 df$pop <- 25
 for(i in 1:length(df[,1])){
-  print(i)
   df[i,2] <- df[i,2] + i
 }
 
@@ -214,7 +209,8 @@ server <- function(input, output, session) {
   })
 
   byDayNoFilter <- reactive({
-    noFilter_byDay <- aggregate(data[,1], by=list(date(data$new_date)), FUN=length)
+    updateData <- data.frame(data)
+    noFilter_byDay <- aggregate(updateData[,1], by=list(date(updateData$new_date)), FUN=length)
     colnames(noFilter_byDay) <- c("Date", "Rides")
     return(noFilter_byDay)
   })
@@ -249,13 +245,65 @@ server <- function(input, output, session) {
 
   })
 
+
+  #CODE FOR LEAFLET
+
+  community_data <- reactive({
+    eachCommunity <- data.frame(data)
+    comm_range <- 1:77
+    company <- input$select_company
+    trip <- input$destination
+
+    if(company != "All Taxis"){
+      eachCommunity <- subset(eachCommunity, eachCommunity$Company == company)
+    }
+
+    if(trip == "goingTo"){
+      eachCommunity <- aggregate(eachCommunity[,1], by=list(eachCommunity$Dropoff.Community.Area), FUN=length)
+    }else{
+      eachCommunity <- aggregate(eachCommunity[,1], by=list(eachCommunity$Pickup.Community.Area), FUN=length)
+    }
+
+    colnames(eachCommunity) <- c("Community", "Percentage")
+    #Fill in missing communities with 0's
+    for(i in 1:77){
+      hasCommunity <- FALSE
+      for(j in 1:length(eachCommunity[,1])){
+        if(eachCommunity[j,1] == i){
+          hasCommunity <- TRUE
+          break
+        }
+      }
+
+      if(!hasCommunity){
+        eachCommunity[nrow(eachCommunity) + 1,] = c(i, 0)
+      }
+    }
+
+    eachCommunity <- eachCommunity[order(eachCommunity$Community),]
+    rownames(eachCommunity) <- 1:nrow(eachCommunity)
+
+    #CONVERT COMMUNITY ID TO NAMES
+    for(i in 1:77){
+      eachCommunity[i,1] <- community_list[i]
+    }
+
+    #Table them as percentages
+    count_sum <- sum(eachCommunity$Percentage)
+    eachCommunity$Percentage <- eachCommunity$Percentage/count_sum
+
+    return(eachCommunity)
+  })
+
   output$mymap3 <- renderLeaflet({
+    comm_df <- community_data()
+    pal <- colorBin("YlOrRd", comm_df$Percentage, 9, pretty = FALSE)
     leaflet(chi_sp) %>%
       addTiles() %>%
       addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-                  fillColor = ~pal(df[area_num_1, 2]),
-                  label = ~paste0(community, ":", df[area_num_1, 2])) %>%
-      addLegend(pal = pal, values = df$pop, opacity = 1.0)
+                  fillColor = ~pal(comm_df[area_num_1, 2]),
+                  popup = ~paste(sep="<br/>", community, comm_df[area_num_1, 2])) %>%
+      addLegend(pal = pal, values = comm_df$Percentage, opacity = 1.0)
   })
 
 }

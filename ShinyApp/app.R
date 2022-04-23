@@ -477,61 +477,24 @@ server <- function(input, output, session) {
 
   output$table_scopes <- renderDataTable(scope_table(), options = list(pageLength = 10))
 
-
-#-------- FOR COMMUNITIES TABLE CREATION ----------------
-  createCommunityTable <- function()
-  {
-    eachCommunity <- data.frame(data)
-    comm_range <- 1:77
-
-    colnames(eachCommunity) <- c("Community", "Percentage")
-    #Fill in missing communities with 0's
-    for(i in 1:77){
-      hasCommunity <- FALSE
-      for(j in 1:length(eachCommunity[,1])){
-        if(eachCommunity[j,1] == i){
-          hasCommunity <- TRUE
-          break
-        }
-      }
-
-      if(!hasCommunity){
-        eachCommunity[nrow(eachCommunity) + 1,] = c(i, 0)
-      }
-    }
-
-    eachCommunity <- eachCommunity[order(eachCommunity$Community),]
-    rownames(eachCommunity) <- 1:nrow(eachCommunity)
-
-    #CONVERT COMMUNITY ID TO NAMES
-    for(i in 1:77){
-      eachCommunity[i,1] <- community_list[i]
-    }
-
-    #Table them as percentages
-    count_sum <- sum(eachCommunity$Percentage)
-    eachCommunity$Percentage <- eachCommunity$Percentage/count_sum
-    eachCommunity <- eachCommunity[order(eachCommunity$Community),, drop=FALSE]
-    return(eachCommunity)
-  }
-
 #--------------- FOR COMMUNITIES -----------------
+
   graph_community_chart <- function()
   {
-    community <- input$select_community
-
-
-
-    if(community == "All (City of Chicago)")
-    {
-
-    }
-
+    g <- NULL
+    
+    community <- community_data()
+    community <- community[order(community$Community),, drop=FALSE]
+    
+    g <- ggplot(community, aes(x=`Community`, y=`Percentage`)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 90))
+    
+    return(g)
+    
   }
-
+  
   output$communitychart <- renderPlot({ graph_community_chart() })
 
-  #--------------- FOR LEAFLET -----------------
+#--------------- FOR LEAFLET -----------------
   community_data <- reactive({
     eachCommunity <- data.frame(data)
     comm_range <- 1:77

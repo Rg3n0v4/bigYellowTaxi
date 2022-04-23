@@ -152,11 +152,11 @@ ui <- shinyUI(
                                  h1("Chicago Taxi Trip Data"),
                                  h4("Author: Wayne Kao and Raphael Genova"),
                                  h4("Dataset: https://data.cityofchicago.org/Transportation/Taxi-Trips-2019/h4cq-z3dy (Warning: This dataset is about 7 GB"),
-                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from Jan 1, 2001- November 21, 2021 along with the locations of all CTA stops by longitude and latitude.
-          from all CTA stations. Each page has its own unique functionality to fit the proper visualizations and format. By default, the site goes to the 'By Date' tab. The 'By Date' tab contains a bar graph that has all of the ridership
-          of each stop at a particular date and there is also a table that gives more detail about what is displayed on the bar graph. This tab also contains a leaflet which shows geographically where each CTA stop is (which is indicated
-          by a blue point). The 'By Station' tab allows the use to compare between two stations at specific years. The bar graphs give ridership numbers per Day, Month, and Weekday. The 'Compare' tab contains two bar graphs and tables each
-          graph/table set represents a particular date the user would like to explore. The graphs and tables display the total ridership of each stop at that particular day.")
+                                 div("The data was taken from the city of chicago page. This app was written to visualize the data of taxi ridership in Chicago since the rise of Uber, Lyft and other ride sharing services. This data 
+                                     is from 2019 so that this can be more representative of a 'typical' year. Upon loading this page, the first tab you'll encounter is the Graphs tab. This tab has 2 graphs (one for showing the 
+                                     different scopes and the other for all the communities) and a table that gives more detail about the scopes and a leaflet to show a heat map of the community areas showing their ridership 
+                                     percentage. On the sidebar, you can change the graphs accordingly by changing the 'Select Community', 'Select Company', or 'Select Distribution Type' dropdowns. You can also change things by 
+                                     pressing different radio buttons like 'Measurement', 'Change Time Format', and 'Destination'.")
                         )
                       )
              ),
@@ -409,32 +409,34 @@ server <- function(input, output, session) {
     if(distribution == "By Day")
     {
       noFilter_byDay <- byDay()
-      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity", fill="lightgreen")
     }
     else if(distribution == "By Hour of Day")
     {
       noFilter_byHour <- byHour()
-      g <- ggplot(data=noFilter_byHour, aes(x=`Hour`, y=`Rides`)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byHour, aes(x=`Hour`, y=`Rides`)) + geom_bar(stat="identity", fill="blue")
     }
     else if(distribution == "By Day of Week")
     {
       noFilter_byDayOfWeek <- byDayOfWeek()
-      g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day Of Week`, y=`Rides`)) + geom_bar(stat="identity")
+      DaysOfTheWeek <- c("Sun","Mon", "Tue", "Wed", "Thur", "Fri", "Sat")
+      noFilter_byDayOfWeek <- cbind(noFilter_byDayOfWeek, DaysOfTheWeek)
+      g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day Of Week`, y=`Rides`, fill=DaysOfTheWeek)) + geom_bar(stat="identity")
     }
     else if(distribution == "By Month")
     {
       noFilter_byMonth<- byMonth()
-      g <- ggplot(data=noFilter_byMonth, aes(x=`Month`, y=`Rides`)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byMonth, aes(x=`Month`, y=`Rides`)) + geom_bar(stat="identity", fill="purple")
     }
     else if(distribution == "By Binned Mileage")
     {
       noFilter_byMileage <- byMileage()
-      g <- ggplot(data=noFilter_byMileage, aes(x=`Miles`, y=`Rides`)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byMileage, aes(x=`Miles`, y=`Rides`)) + geom_bar(stat="identity", fill="red")
     }
     else if(distribution == "By Binned Trip Time")
     {
       noFilter_byTime<- byTime()
-      g <- ggplot(data=noFilter_byTime, aes(x=`Time`, y=`Rides`)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byTime, aes(x=`Time`, y=`Rides`)) + geom_bar(stat="identity", fill="orange")
     }
 
     return(g)

@@ -455,7 +455,7 @@ server <- function(input, output, session) {
     }
     else if(distribution == "By Day of Week")
     {
-      g <- byDayOfWeekr()
+      g <- byDayOfWeek()
     }
     else if(distribution == "By Month")
     {

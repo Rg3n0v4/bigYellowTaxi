@@ -132,7 +132,8 @@ ui <- shinyUI(
                                     fluidRow(id="top-row",
                                              column(9, id="communities_graph",
                                                     box(
-                                                      title = "Bar Chart (for all communities)", width = "100%", height = 750
+                                                      title = "Bar Chart (for all communities)", width = "100%", height = 750,
+                                                      plotOutput("communitychart", width = "100%", height = 700)
                                                     )
                                              ),
                                              column(3, id="leaflet_box",
@@ -196,7 +197,7 @@ server <- function(input, output, session) {
     return(updateData)
   })
 
-#------------------ FOR DAY ----------------  
+#-------- FOR DAY ----------------  
   byDayNoFilter <- reactive({
     noFilter_byDay <- aggregate(data[,1], by=list(date(data$new_date)), FUN=length)
     colnames(noFilter_byDay) <- c("Date", "Rides")
@@ -216,7 +217,7 @@ server <- function(input, output, session) {
   }) #Aggregates all stations by specific date
 
 
-#------------------ FOR HOUR ------------------
+#-------- FOR HOUR ------------------
   byHourNoFilter <- reactive({
     noFilter_byHour <- aggregate(data[,1], by=list(data$Hour), FUN=length)
     colnames(noFilter_byHour) <- c("Hour", "Rides")
@@ -235,7 +236,7 @@ server <- function(input, output, session) {
     return(noFilter_byHour)
   }) #Aggregates all stations by specific hour
   
-#----------- FOR DAY OF WEEK -----------------
+#-------- FOR DAY OF WEEK -----------------
   #* STARTS MONDAY TO SUNDAY WITH 1 BEING MONDAY
   
   byDayOfWeekNoFilter <- reactive({
@@ -397,7 +398,7 @@ server <- function(input, output, session) {
     return(noFilter_byBinnedTime)
   }) #Aggregates all stations by specific month
 
-#--------------- graph_scope_chart function -------------------
+#-------- FOR SCOPES GRAPH AND TABLE FUNCTIONS -------------------
   graph_scope_chart <- function()
   {
     
@@ -475,6 +476,62 @@ server <- function(input, output, session) {
   output$scopechart <- renderPlot({   graph_scope_chart()  })
   
   output$table_scopes <- renderDataTable(scope_table(), options = list(pageLength = 10))
+  
+
+#-------- FOR COMMUNITIES TABLE CREATION ----------------
+  createCommunityTable <- function()
+  {
+    eachCommunity <- data.frame(data)
+    comm_range <- 1:77
+    
+    colnames(eachCommunity) <- c("Community", "Percentage")
+    #Fill in missing communities with 0's
+    for(i in 1:77){
+      hasCommunity <- FALSE
+      for(j in 1:length(eachCommunity[,1])){
+        if(eachCommunity[j,1] == i){
+          hasCommunity <- TRUE
+          break
+        }
+      }
+      
+      if(!hasCommunity){
+        eachCommunity[nrow(eachCommunity) + 1,] = c(i, 0)
+      }
+    }
+    
+    eachCommunity <- eachCommunity[order(eachCommunity$Community),]
+    rownames(eachCommunity) <- 1:nrow(eachCommunity)
+    
+    #CONVERT COMMUNITY ID TO NAMES
+    for(i in 1:77){
+      eachCommunity[i,1] <- community_list[i]
+    }
+    
+    #Table them as percentages
+    count_sum <- sum(eachCommunity$Percentage)
+    eachCommunity$Percentage <- eachCommunity$Percentage/count_sum
+    eachCommunity <- eachCommunity[order(eachCommunity$Community),, drop=FALSE]
+    return(eachCommunity)
+  }
+  
+#--------------- FOR COMMUNITIES -----------------
+  graph_community_chart <- function()
+  {
+    community <- input$select_community
+    
+    
+    
+    if(community == "All (City of Chicago)")
+    {
+      
+    }
+    
+  }
+  
+  output$communitychart <- renderPlot({ graph_community_chart() })
+  
+#-------- END OF EVERYTHING --------------------
 
 }
 

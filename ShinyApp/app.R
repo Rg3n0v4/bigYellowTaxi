@@ -368,41 +368,50 @@ server <- function(input, output, session) {
     #Aggregate by binned mileage
 
     #Add to global
-    mile_bin <- c("0.5 to < 10", "10 to < 20", "20 to < 30", "30 to < 40", "40 to < 50", "50 to < 60", "60 to < 70", "70 to < 80", "80 to < 90", "90 to 100")
-    km_bin <- c("0.5 to < 15", "15 to < 30", "30 to < 45", "45 to < 60", "60 to < 75", "75 to < 90", "90 to < 105", "105 to < 120", "120 to < 135", "135 to 161")
+    mile_bin <- c("0.5 to < 2", "2 to < 4", "4 to < 6", "6 to < 8", "8 to < 10", "10 to < 20", "20 to < 30", "30 to < 40", "40 to < 50", "50 to < 60", "60 to < 70", "70 to < 80", "80 to < 90", "90 to 100")
+    km_bin <- c("0.5 to < 3", "3 to < 6", "6 to < 9", "9 to < 12", "12 to < 15", "15 to < 30", "30 to < 45", "45 to < 60", "60 to < 75", "75 to < 90", "90 to < 105", "105 to < 120", "120 to < 135", "135 to 161")
 
     bin_data = data.frame(updateData)
     bin_data$Mile_Bin <- NA
+    noFilter_byBinnedMileage <- NULL
      #Actual code to get data frame
     if(units == "miles"){
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 10] <- mile_bin[1]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 10 & bin_data$Trip.Miles < 20] <- mile_bin[2]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 20 & bin_data$Trip.Miles < 30] <- mile_bin[3]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 40] <- mile_bin[4]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 40 & bin_data$Trip.Miles < 50] <- mile_bin[5]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 50 & bin_data$Trip.Miles < 60] <- mile_bin[6]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 70] <- mile_bin[7]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 70 & bin_data$Trip.Miles < 80] <- mile_bin[8]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 80 & bin_data$Trip.Miles < 90] <- mile_bin[9]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles <= 100] <- mile_bin[10]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 2] <- mile_bin[1]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 2 & bin_data$Trip.Miles < 4] <- mile_bin[2]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 4 & bin_data$Trip.Miles < 6] <- mile_bin[3]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 6 & bin_data$Trip.Miles < 8] <- mile_bin[4]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 8 & bin_data$Trip.Miles < 10] <- mile_bin[5]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 10 & bin_data$Trip.Miles < 20] <- mile_bin[6]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 20 & bin_data$Trip.Miles < 30] <- mile_bin[7]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 40] <- mile_bin[8]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 40 & bin_data$Trip.Miles < 50] <- mile_bin[9]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 50 & bin_data$Trip.Miles < 60] <- mile_bin[10]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 70] <- mile_bin[11]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 70 & bin_data$Trip.Miles < 80] <- mile_bin[12]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 80 & bin_data$Trip.Miles < 90] <- mile_bin[13]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles <= 100] <- mile_bin[14]
       bin_data$Mile_Bin <- factor(bin_data$Mile_Bin, levels = mile_bin, ordered = TRUE)
+      noFilter_byBinnedMileage <- aggregate(bin_data[,1], by=list(bin_data$Mile_Bin), FUN=length)
+      colnames(noFilter_byBinnedMileage) <- c("Miles", "Rides")
     }else{
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 15] <- km_bin[1]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 15 & bin_data$Trip.Miles < 30] <- km_bin[2]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 45] <- km_bin[3]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 45 & bin_data$Trip.Miles < 60] <- km_bin[4]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 75] <- km_bin[5]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 75 & bin_data$Trip.Miles < 90] <- km_bin[6]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles < 105] <- km_bin[7]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 105 & bin_data$Trip.Miles < 120] <- km_bin[8]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 120 & bin_data$Trip.Miles < 135] <- km_bin[9]
-      bin_data$Mile_Bin[bin_data$Trip.Miles >= 135 & bin_data$Trip.Miles <= 161] <- km_bin[10]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 0.5 & bin_data$Trip.Miles < 3] <- km_bin[1]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 3 & bin_data$Trip.Miles < 6] <- km_bin[2]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 6 & bin_data$Trip.Miles < 9] <- km_bin[3]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 9 & bin_data$Trip.Miles < 12] <- km_bin[4]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 12 & bin_data$Trip.Miles < 15] <- km_bin[5]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 15 & bin_data$Trip.Miles < 30] <- km_bin[6]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 30 & bin_data$Trip.Miles < 45] <- km_bin[7]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 45 & bin_data$Trip.Miles < 60] <- km_bin[8]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 60 & bin_data$Trip.Miles < 75] <- km_bin[9]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 75 & bin_data$Trip.Miles < 90] <- km_bin[10]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 90 & bin_data$Trip.Miles < 105] <- km_bin[11]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 105 & bin_data$Trip.Miles < 120] <- km_bin[12]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 120 & bin_data$Trip.Miles < 135] <- km_bin[13]
+      bin_data$Mile_Bin[bin_data$Trip.Miles >= 135 & bin_data$Trip.Miles <= 161] <- km_bin[14]
       bin_data$Mile_Bin <- factor(bin_data$Mile_Bin, levels = km_bin, ordered = TRUE)
+      noFilter_byBinnedMileage <- aggregate(bin_data[,1], by=list(bin_data$Mile_Bin), FUN=length)
+      colnames(noFilter_byBinnedMileage) <- c("KM", "Rides")
     }
-
-    noFilter_byBinnedMileage <- aggregate(bin_data[,1], by=list(bin_data$Mile_Bin), FUN=length)
-    colnames(noFilter_byBinnedMileage) <- c("Miles", "Rides")
-    noFilter_byBinnedMileage
 
     return(noFilter_byBinnedMileage)
   }) #Aggregates all stations by mileage

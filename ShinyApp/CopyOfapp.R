@@ -458,6 +458,14 @@ server <- function(input, output, session) {
     }
     else if(distribution == "By Day of Week")
     {
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 1] <- "Mon"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 2] <- "Tue"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 3] <- "Wed"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 4] <- "Thur"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 5] <- "Fri"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 6] <- "Sat"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 7] <- "Sun"
+
       noFilter_byDayOfWeek <- byDayOfWeek()
       g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day Of Week`, y=`Rides`)) + geom_bar(stat="identity")
     }

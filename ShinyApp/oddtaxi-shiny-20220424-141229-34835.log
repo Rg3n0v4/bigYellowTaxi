@@ -1,0 +1,82 @@
+su: ignoring --preserve-environment, it's mutually exclusive with --login
+
+Attaching package: ‘shinydashboard’
+
+The following object is masked from ‘package:graphics’:
+
+    box
+
+
+Attaching package: ‘lubridate’
+
+The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+
+Attaching package: ‘DT’
+
+The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:gridExtra’:
+
+    combine
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Warning: Navigation containers expect a collection of `bslib::nav()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.
+
+Listening on http://127.0.0.1:34835
+Warning: Error in FUN: object 'Miles' not found
+  181: FUN
+  180: lapply
+  179: scales_add_defaults
+  178: f
+  177: l$compute_aesthetics
+  176: f
+  175: by_layer
+  174: ggplot_build.ggplot
+  172: print.ggplot
+  167: func
+  165: f
+  164: Reduce
+  155: do
+  154: hybrid_chain
+  126: drawPlot
+  112: <reactive:plotObj>
+   96: drawReactive
+   83: renderFunc
+   82: output$scopechart
+    1: runApp
+Warning: Error in FUN: object 'Miles' not found
+  181: FUN
+  180: lapply
+  179: scales_add_defaults
+  178: f
+  177: l$compute_aesthetics
+  176: f
+  175: by_layer
+  174: ggplot_build.ggplot
+  172: print.ggplot
+  167: func
+  165: f
+  164: Reduce
+  155: do
+  154: hybrid_chain
+  126: drawPlot
+  112: <reactive:plotObj>
+   96: drawReactive
+   83: renderFunc
+   82: output$scopechart
+    1: runApp

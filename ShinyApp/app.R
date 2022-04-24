@@ -231,14 +231,6 @@ server <- function(input, output, session) {
       updateData$Trip.Miles <- updateData$Trip.Miles * 1.609344
     }
 
-    # if(time == "twelveHr"){
-    #   updateData
-    # }
-
-
-    #TODO
-    #add Mile / KM data changing option
-    #add 12 hr and 24 hr data changing option
     return(updateData)
   })
 #
@@ -270,18 +262,48 @@ server <- function(input, output, session) {
 #   #   return(noFilter_byHour)
 #   # })
 #
-  byHour <- function(){
+  byHour <- reactive({
     #If you don't include this, going back to city of chicago is slow
-    if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_hour_data[c(2,3)])
-    }
+    # if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
+    #   return(by_hour_data[c(2,3)])
+    # }
     #
 
     updateData <- filterData()
     noFilter_byHour <- aggregate(updateData[,1], by=list(updateData$Hour), FUN=length)
     colnames(noFilter_byHour) <- c("Hour", "Rides")
+    if(input$time == "twelveHr"){
+      twelve_hr_time <- c("12 AM", "1 AM" , "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM",
+        "12 PM", "1 PM" , "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM")
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 0] <- "12 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 1] <- "1 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 2] <- "2 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 3] <- "3 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 4] <- "4 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 5] <- "5 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 6] <- "6 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 7] <- "7 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 8] <- "8 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 9] <- "9 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 10] <- "10 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 11] <- "11 AM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 12] <- "12 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 13] <- "1 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 14] <- "2 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 15] <- "3 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 16] <- "4 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 17] <- "5 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 18] <- "6 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 19] <- "7 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 20] <- "8 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 21] <- "9 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 22] <- "10 PM"
+      noFilter_byHour$Hour[noFilter_byHour["Hour"] == 23] <- "11 PM"
+      noFilter_byHour$Hour <- factor(noFilter_byHour$Hour, levels = twelve_hr_time, ordered = TRUE)
+    }
+
     return(noFilter_byHour)
-  } #Aggregates all stations by specific hour
+  }) #Aggregates all stations by specific hour
 #
 # #-------- FOR DAY OF WEEK -----------------
 #   #* STARTS MONDAY TO SUNDAY WITH 1 BEING MONDAY
@@ -480,7 +502,8 @@ server <- function(input, output, session) {
     if(distribution == "By Day")
     {
       noFilter_byDay <- byDay()
-      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity", fill="lightgreen") + theme(axis.text.x = element_text(angle = 90))
+      g <- ggplot(data=noFilter_byDay, aes(x=ymd(`Date`), y=`Rides`)) + geom_bar(stat="identity", fill="lightgreen") + theme(axis.text.x = element_text(angle = 90)) +
+        xlab("Date (Per Day)")
     }
     else if(distribution == "By Hour of Day")
     {
@@ -518,7 +541,11 @@ server <- function(input, output, session) {
     else if(distribution == "By Binned Mileage")
     {
       noFilter_byMileage <- byMileage()
-      g <- ggplot(data=noFilter_byMileage, aes(x=`Miles`, y=`Rides`)) + geom_bar(stat="identity", fill="red")
+      if(input$measurement == "miles"){
+        g <- ggplot(data=noFilter_byMileage, aes(x=`Miles`, y=`Rides`)) + geom_bar(stat="identity", fill="red")
+      }else{
+        g <- ggplot(data=noFilter_byMileage, aes(x=`KM`, y=`Rides`)) + geom_bar(stat="identity", fill="red")
+      }
     }
     else if(distribution == "By Binned Trip Time")
     {

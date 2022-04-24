@@ -231,9 +231,9 @@ server <- function(input, output, session) {
       updateData$Trip.Miles <- updateData$Trip.Miles * 1.609344
     }
 
-    if(time == "twelveHr"){
-      updateData
-    }
+    # if(time == "twelveHr"){
+    #   updateData
+    # }
 
 
     #TODO
@@ -243,16 +243,16 @@ server <- function(input, output, session) {
   })
 #
 # #-------- FOR DAY ----------------
-#   # byDayNoFilter <- reactive({
-#   #   noFilter_byDay <- aggregate(data[,1], by=list(date(data$Date)), FUN=length)
-#   #   colnames(noFilter_byDay) <- c("Date", "Rides")
-#   #   return(noFilter_byDay)
-#   # })
-#
+  # byDayNoFilter <- reactive({
+  #   noFilter_byDay <- aggregate(data[,1], by=list(date(data$Date)), FUN=length)
+  #   colnames(noFilter_byDay) <- c("Date", "Rides")
+  #   return(noFilter_byDay)
+  # })
+
   byDay <- function(){
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_day_data)
+      return(by_day_data[c(2,3)])
     }
 
     updateData <- filterData()
@@ -273,7 +273,7 @@ server <- function(input, output, session) {
   byHour <- function(){
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_hour_data)
+      return(by_hour_data[c(2,3)])
     }
     #
 
@@ -295,7 +295,8 @@ server <- function(input, output, session) {
   byDayOfWeek <- function(){
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_dayofweek_data)
+      colnames(by_dayofweek_data) <- c("", "Day Of Week", "Rides")
+      return(by_dayofweek_data[c(2,3)])
     }
 
     updateData <- filterData()
@@ -317,7 +318,7 @@ server <- function(input, output, session) {
   byMonth <- function(){
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_month_data)
+      return(by_month_data[c(2,3)])
     }
 
     updateData <- filterData()
@@ -432,7 +433,7 @@ server <- function(input, output, session) {
   byTime <- function(){
     #If you don't include this, going back to city of chicago is slow
     if(input$select_community == "All (City of Chicago)" && input$select_company == "All Taxis"){
-      return(by_binned_data)
+      return(by_binned_data[c(2,3)])
     }
 
     updateData <- filterData()
@@ -470,7 +471,7 @@ server <- function(input, output, session) {
     if(distribution == "By Day")
     {
       noFilter_byDay <- byDay()
-      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity", fill="lightgreen")
+      g <- ggplot(data=noFilter_byDay, aes(x=`Date`, y=`Rides`)) + geom_bar(stat="identity", fill="lightgreen") + theme(axis.text.x = element_text(angle = 90))
     }
     else if(distribution == "By Hour of Day")
     {
@@ -488,9 +489,17 @@ server <- function(input, output, session) {
     {
       noFilter_byDayOfWeek <- byDayOfWeek()
       DaysOfTheWeek <- c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")
-      noFilter_byDayOfWeek <- cbind(noFilter_byDayOfWeek, DaysOfTheWeek)
+      # noFilter_byDayOfWeek <- cbind(noFilter_byDayOfWeek, DaysOfTheWeek)
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 1] <- "Mon"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 2] <- "Tue"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 3] <- "Wed"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 4] <- "Thur"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 5] <- "Fri"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 6] <- "Sat"
+      noFilter_byDayOfWeek$DaysOfTheWeek[noFilter_byDayOfWeek["Day Of Week"] == 7] <- "Sun"
+      noFilter_byDayOfWeek$DaysOfTheWeek <- factor(noFilter_byDayOfWeek$DaysOfTheWeek, levels = DaysOfTheWeek, ordered = TRUE)
       print(noFilter_byDayOfWeek)
-      g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day.Of.Week`, y=`Rides`, fill=DaysOfTheWeek)) + geom_bar(stat="identity")
+      g <- ggplot(data=noFilter_byDayOfWeek, aes(x=`Day Of Week`, y=`Rides`, fill=DaysOfTheWeek)) + geom_bar(stat="identity")
     }
     else if(distribution == "By Month")
     {

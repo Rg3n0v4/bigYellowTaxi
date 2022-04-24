@@ -79,18 +79,6 @@ ui <- shinyUI(
   navbarPage("OddTaxi", position = "fixed-bottom",
              tabPanel("Graphs",
                       fluidPage(tags$style(HTML("
-                                  #scopes_graph {
-                                      border: 4px double red;
-                                  }
-                                  #communities_graph {
-                                      border: 2px dashed blue;
-                                  }
-                                  #table_box {
-                                      border: 2px dashed green;
-                                  }
-                                  #leaflet_box {
-                                      border: 2px dashed orange;
-                                  }
                                 ")),
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
